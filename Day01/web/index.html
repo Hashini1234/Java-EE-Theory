@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>sample HTML Page</title>
+</head>
+<body>
+<h1>Welcome to sample HTML Code</h1>
+<p>This is a sample HTML document</p>
+<div>
+    <input type="text" id="id" placeholder="Enter your ID">
+    <input type="text" id="name" placeholder="Enter your Name">
+    <input type="text" id="address" placeholder="Enter your Address">
+    <button id="btn-add">Add</button>
+</div>
+<script src="jquery-3.7.1.min.js"></script>
+<script>
+
+    var id = $('#id').val();
+    var name = $('#name').val();
+    var address = $('#address').val();
+
+    $('#id').click(function (){
+        console.log("start")
+        $.ajax({
+            url:"http://localhost:8080/Day01_Web_exploded/customer?id="+id+"&name="+name+"&address="+address,
+            method:'POST',
+            // async:false,
+            success:function (response){
+                console.log(response);
+            },
+            error:function (){
+                console.log('error occurred while fetching data');
+            }
+        })
+    })
+</script>
+</body>
+</html>

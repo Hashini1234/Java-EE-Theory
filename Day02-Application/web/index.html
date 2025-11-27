@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Customer Management System</title>
+    <link href="style.css" rel="stylesheet"> <!-- External CSS link -->
+    <script src="jquery-3.7.1.min.js"></script> <!-- jQuery library for AJAX -->
+</head>
+<body>
+
+<!-- Page title -->
+<h1>Customer Management System</h1>
+
+<!-- Form container -->
+<div class="form-container">
+    <!-- Input fields -->
+    <input type="text" id="cid" placeholder="Customer ID">
+    <input type="text" id="cname" placeholder="Customer Name">
+    <input type="text" id="caddress" placeholder="Customer Address">
+
+    <!-- Buttons group -->
+    <div class="button-group">
+        <button id="save-customer">Save</button>
+        <button id="update-customer">Update</button>
+        <button id="delete-customer">Delete</button>
+        <button id="clear-btn">Clear</button>
+    </div>
+</div>
+
+<!-- Button to load all customers -->
+<button id="get-customer">Get All Customers</button>
+
+<!-- Message div for success/error -->
+<div id="message"></div>
+
+<!-- Table container -->
+<div id="content">
+    <table id="customer-table">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Address</th>
+        </tr>
+        </thead>
+        <tbody id="table-body"></tbody> <!-- Table rows will be dynamically added here -->
+    </table>
+    <div class="empty-message">No customers found.</div> <!-- Show if table is empty -->
+</div>
+
+<script>
+    const BASE_URL = "http://localhost:8080/Day02_Application_war_exploded/customer";
+
+    // Show message function
+    function showMessage(message, isSuccess) {
+        const msgDiv = $('#message');
+        msgDiv.removeClass('success error')
+            .addClass(isSuccess ? 'success' : 'error')
+            .text(message)
+            .fadeIn();
+        setTimeout(() => msgDiv.fadeOut(), 3000);
+    }
+
+    // Load all customers from server
+    function loadCustomers() {
+        $.ajax({
+            url: BASE_URL,
+            method: "GET",
+            success: function(response) {
+                let rows = "";
+                let lines = response.trim().split("\n");
+
+                if (lines[0] === "") { // If empty response
+                    $('.empty-message').show();
+                    $('#customer-table').hide();
+                    return;
+                }
+
+                for (let line of lines) {
+                    let parts = line.split(",");
+                    if (parts.length === 3) {
+                        rows += `<tr>
+                                    <td>${parts[0]}</td>
+                                    <td>${parts[1]}</td>
+                                    <td>${parts[2]}</td>
+                                 </tr>`;
+                    }
+                }
+
+                $('#table-body').html(rows);
+                $('#customer-table').show();
+                $('.empty-message').hide();
+
+                attachRowClickEvents(); // Add click events for rows
+            },
+            error: function() { showMessage("Error loading customers", false); }
+        });
+    }
+
+    // When a table row is clicked, populate form fields
+    function attachRowClickEvents() {
+        $('#table-body tr').click(function() {
+            $('#table-body tr').removeClass('selected'); // Deselect other rows
+            $(this).addClass('selected'); // Highlight clicked row
+
+            $('#cid').val($(this).find('td:eq(0)').text());
+            $('#cname').val($(this).find('td:eq(1)').text());
+            $('#caddress').val($(this).find('td:eq(2)').text());
+        });
+    }
+
+    // Clear form fields
+    function clearForm() {
+        $('#cid').val('');
+        $('#cname').val('');
+        $('#caddress').val('');
+        $('#table-body tr').removeClass('selected');
+    }
+
+    // Save customer
+    $('#save-customer').click(function() {
+        let cid = $('#cid').val().trim();
+        let cname = $('#cname').val().trim();
+        let caddress = $('#caddress').val().trim();
+        if (!cid || !cname || !caddress) {
+            showMessage("Please fill all fields", false);
+            return;
+        }
+        $.ajax({
+            url: BASE_URL,
+            method: "POST",
+            data: {id: cid, name: cname, address: caddress},
+            success: function(res) { showMessage(res,true); clearForm(); loadCustomers(); },
+            error: function() { showMessage("Error saving customer", false); }
+        });
+    });
+
+    // Update customer
+    $('#update-customer').click(function() {
+        let cid = $('#cid').val().trim();
+        let cname = $('#cname').val().trim();
+        let caddress = $('#caddress').val().trim();
+        if (!cid || !cname || !caddress) {
+            showMessage("Please fill all fields", false);
+            return;
+        }
+        $.ajax({
+            url: BASE_URL + "?id=" + encodeURIComponent(cid) + "&name=" + encodeURIComponent(cname) + "&address=" + encodeURIComponent(caddress),
+            method: "PUT",
+            success: function(res) { showMessage(res,true); clearForm(); loadCustomers(); },
+            error: function() { showMessage("Error updating customer", false); }
+        });
+    });
+
+    // Delete customer
+    $('#delete-customer').click(function() {
+        let cid = $('#cid').val().trim();
+        if(!cid) { showMessage("Enter ID to delete", false); return; }
+        if(!confirm("Delete customer ID: " + cid + "?")) return;
+        $.ajax({
+            url: BASE_URL + "?id=" + encodeURIComponent(cid),
+            method: "DELETE",
+            success: function(res) { showMessage(res,true); clearForm(); loadCustomers(); },
+            error: function() { showMessage("Error deleting customer", false); }
+        });
+    });
+
+    // Clear form button
+    $('#clear-btn').click(clearForm);
+
+    // Get all customers button
+    $('#get-customer').click(loadCustomers);
+
+    // Load customers when page loads
+    $(document).ready(loadCustomers);
+</script>
+
+</body>
+</html>

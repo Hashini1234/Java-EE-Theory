@@ -14,7 +14,7 @@ public class CustomerServlet extends HttpServlet {
     private static final String DB_USER = "root";
     private static final String DB_PASS = "1234";
 
-    // CREATE
+    // SAVE
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String id = req.getParameter("id");

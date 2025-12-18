@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Customer</title>
+</head>
+<body>
+
+<h1>CUSTOMER</h1>
+
+<div>
+    <button onclick="window.location.href='Customer.html'">Customer</button>
+    <button onclick="window.location.href='Item.html'">Item</button>
+    <button onclick="window.location.href='order.html'">Order</button>
+    <button onclick="window.location.href='../index.html'">Home</button>
+</div>
+
+<br>
+
+<div>
+    <input type="text" id="customer-id" placeholder="Customer ID">
+    <input type="text" id="customer-name" placeholder="Customer Name">
+    <input type="text" id="customer-address" placeholder="Customer Address">
+
+    <button onclick="saveCustomer()">Save</button>
+    <button onclick="updateCustomer()">Update</button>
+    <button onclick="deleteCustomer()">Delete</button>
+    <button onclick="getAllCustomers()">Get All</button>
+</div>
+
+<br>
+
+<table border="1">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Address</th>
+    </tr>
+    </thead>
+    <tbody id="customer-tbody"></tbody>
+</table>
+
+<script src="../assests/js/jquery-3.7.1.min.js"></script>
+
+<script>
+    const API_URL = "http://localhost:8080/Day5_POS_Backend_Web_exploded/api/v1/customer";
+
+    // ---------- SAVE ----------
+    function saveCustomer() {
+        const customer = {
+            id: $('#customer-id').val(),
+            name: $('#customer-name').val(),
+            address: $('#customer-address').val()
+        };
+
+        $.ajax({
+            url: API_URL,
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(customer),
+            success: function (res) {
+                alert("Customer Saved");
+                clearFields();
+                getAllCustomers();
+            },
+            error: function (err) {
+                console.log(err);
+            }
+        });
+    }
+
+    // ---------- UPDATE ----------
+    function updateCustomer() {
+        const customer = {
+            id: $('#customer-id').val(),
+            name: $('#customer-name').val(),
+            address: $('#customer-address').val()
+        };
+
+        $.ajax({
+            url: API_URL,
+            method: 'PUT',
+            contentType: 'application/json',
+            data: JSON.stringify(customer),
+            success: function () {
+                alert("Customer Updated");
+                clearFields();
+                getAllCustomers();
+            },
+            error: function (err) {
+                console.log(err);
+            }
+        });
+    }
+
+    // ---------- DELETE ----------
+    function deleteCustomer() {
+        const id = $('#customer-id').val();
+
+        $.ajax({
+            url: API_URL + "?id=" + id,
+            method: 'DELETE',
+            success: function () {
+                alert("Customer Deleted");
+                clearFields();
+                getAllCustomers();
+            },
+            error: function (err) {
+                console.log(err);
+            }
+        });
+    }
+
+    // ---------- GET ALL ----------
+    function getAllCustomers() {
+        $('#customer-tbody').empty();
+
+        $.ajax({
+            url: API_URL,
+            method: 'GET',
+            success: function (customers) {
+                customers.forEach(c => {
+                    $('#customer-tbody').append(`
+                        <tr>
+                            <td>${c.id}</td>
+                            <td>${c.name}</td>
+                            <td>${c.address}</td>
+                        </tr>
+                    `);
+                });
+            },
+            error: function (err) {
+                console.log(err);
+            }
+        });
+    }
+
+    function clearFields() {
+        $('#customer-id').val('');
+        $('#customer-name').val('');
+        $('#customer-address').val('');
+    }
+</script>
+
+</body>
+</html>

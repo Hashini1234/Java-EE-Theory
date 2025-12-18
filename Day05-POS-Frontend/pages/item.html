@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Item</title>
+</head>
+<body>
+
+<h1>ITEM</h1>
+
+<div>
+    <button onclick="window.location.href='Customer.html'">Customer</button>
+    <button onclick="window.location.href='Item.html'">Item</button>
+    <button onclick="window.location.href='order.html'">Order</button>
+    <button onclick="window.location.href='../index.html'">Home</button>
+</div>
+
+<br>
+
+<div>
+    <input type="text" id="item-id" placeholder="Item ID">
+    <input type="text" id="item-name" placeholder="Item Name">
+    <input type="number" id="item-qty" placeholder="Qty">
+
+    <button onclick="saveItem()">Save</button>
+    <button onclick="updateItem()">Update</button>
+    <button onclick="deleteItem()">Delete</button>
+    <button onclick="getAllItems()">Get All</button>
+</div>
+
+<br>
+
+<table border="1">
+    <thead>
+    <tr>
+        <th>Item ID</th>
+        <th>Item Name</th>
+        <th>Qty</th>
+    </tr>
+    </thead>
+    <tbody id="item-tbody"></tbody>
+</table>
+
+<script src="../assests/js/jquery-3.7.1.min.js"></script>
+
+<script>
+    const ITEM_API = "http://localhost:8080/Day5_POS_Backend_Web_exploded/api/v1/item";
+
+    function saveItem() {
+        const item = {
+            itemId: $('#item-id').val(),
+            itemName: $('#item-name').val(),
+            qty: $('#item-qty').val()
+        };
+
+        $.ajax({
+            url: ITEM_API,
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(item),
+            success: function () {
+                alert("Item Saved");
+                clearFields();
+                getAllItems();
+            }
+        });
+    }
+
+    function updateItem() {
+        const item = {
+            itemId: $('#item-id').val(),
+            itemName: $('#item-name').val(),
+            qty: $('#item-qty').val()
+        };
+
+        $.ajax({
+            url: ITEM_API,
+            method: 'PUT',
+            contentType: 'application/json',
+            data: JSON.stringify(item),
+            success: function () {
+                alert("Item Updated");
+                clearFields();
+                getAllItems();
+            }
+        });
+    }
+
+    function deleteItem() {
+        const id = $('#item-id').val();
+
+        $.ajax({
+            url: ITEM_API + "?itemId=" + id,
+            method: 'DELETE',
+            success: function () {
+                alert("Item Deleted");
+                clearFields();
+                getAllItems();
+            }
+        });
+    }
+
+    function getAllItems() {
+        $('#item-tbody').empty();
+
+        $.ajax({
+            url: ITEM_API,
+            method: 'GET',
+            success: function (items) {
+                items.forEach(i => {
+                    $('#item-tbody').append(`
+                        <tr>
+                            <td>${i.itemId}</td>
+                            <td>${i.itemName}</td>
+                            <td>${i.qty}</td>
+                        </tr>
+                    `);
+                });
+            }
+        });
+    }
+
+    function clearFields() {
+        $('#item-id').val('');
+        $('#item-name').val('');
+        $('#item-qty').val('');
+    }
+</script>
+
+</body>
+</html>
